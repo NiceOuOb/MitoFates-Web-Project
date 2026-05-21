@@ -4,16 +4,11 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const cors = require('cors');
 
 const PORT = 3000;
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
-const allowedOrigins = [
-    'http://localhost:' + PORT,
-    // 這邊輸入上線後使用的網域
-];
 
 // 設定 MitoFates 腳本路徑
 const MITOFATES_ROOT = path.join(__dirname, '../MitoFates/script');
@@ -28,7 +23,6 @@ if (!fs.existsSync(RESULTS_DIR)) {
 
 app.use(express.static('public'));
 app.use(express.json());
-app.use(cors());
 
 // ---------------------------------------------------------
 // [自動清理機制] 每小時執行一次，刪除 14 天前的 JSON 檔案

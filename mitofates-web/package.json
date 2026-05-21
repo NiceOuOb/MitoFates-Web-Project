@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "setup-lab": "npm ci --omit=dev"
+    "setup": "npm ci --omit=dev",
+    "install": "echo \"Installing MitoFates:\" && git clone https://github.com/ken1roimai/MitoFates.git ../ -q"
   },
   "keywords": [],
   "author": "",
