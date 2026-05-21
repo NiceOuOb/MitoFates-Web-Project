@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev-start": "nodemon server.js",
-    "init": "sudo apt update && sudo apt install -y nodejs npm && sudo apt install -y libsvm-tools libmath-cephes-perl libperl6-slurp-perl libinline-perl && sudo ln -sf /usr/bin/svm-predict /usr/bin/svm_predict && sudo ln -sf /usr/bin/svm-scale /usr/bin/svm_scale",
+    "init": "sudo apt install -y libsvm-tools libmath-cephes-perl libperl6-slurp-perl libinline-perl && sudo ln -sf /usr/bin/svm-predict /usr/bin/svm_predict && sudo ln -sf /usr/bin/svm-scale /usr/bin/svm_scale",
     "install": "echo \"Installing MitoFates:\" && git clone https://github.com/ken1roimai/MitoFates.git ../MitoFates",
     "setup": "npm ci --omit=dev",
     "start": "node server.js",
