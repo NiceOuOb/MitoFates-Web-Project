@@ -4,8 +4,10 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+require('dotenv').config();
 
-const PORT = 3000;
+const HOST = process.env.HOST;
+const PORT = process.env.PORT;
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
@@ -123,7 +125,7 @@ app.post('/predict', upload.single('fastaFile'), (req, res) => {
 
 app.listen(PORT, () => {
     console.log('===========================================');
-    console.log(`🚀 服務運行中: http://localhost:${PORT}`);
+    console.log(`🚀 服務運行中: ${HOST}:${PORT}`);
     console.log('===========================================');
 }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
