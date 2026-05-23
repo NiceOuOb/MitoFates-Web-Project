@@ -40,7 +40,7 @@ setInterval(() => {
             const filePath = path.join(RESULTS_DIR, file);
             fs.stat(filePath, (err, stats) => {
                 if (err) return;
-                if (Date.now() - stats.mtimeMs > EXPIRATION_TIME) {
+                if (Date.now() - stats.mtimeMs > EXPIRATION_TIME && file != '.gitkeep') {
                     fs.unlink(filePath, () => console.log(`🗑️ 已刪除過期任務：${file}`));
                 }
             });
