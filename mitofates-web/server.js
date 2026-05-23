@@ -4,6 +4,10 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+require('dotenv').config();
+
+const HOST = process.env.HOST;
+const PORT = process.env.PORT;
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
@@ -25,8 +29,8 @@ app.use(express.json());
 // ---------------------------------------------------------
 // [自動清理機制] 每小時執行一次，刪除 14 天前的 JSON 檔案
 // ---------------------------------------------------------
-const CLEANUP_INTERVAL = 60 * 60 * 1000; 
-const EXPIRATION_TIME = 14 * 24 * 60 * 60 * 1000; 
+const CLEANUP_INTERVAL = 60 * 60 * 1000;
+const EXPIRATION_TIME = 14 * 24 * 60 * 60 * 1000;
 
 setInterval(() => {
     console.log('🧹 執行背景清理：正在掃描過期任務...');
@@ -53,6 +57,12 @@ app.get('/result/:taskId', (req, res) => {
 });
 
 app.get('/api/result/:taskId', (req, res) => {
+    const taskId = req.params.taskId;
+    // 檢查是否符合ID格式
+    if(!/^[a-f0-9]{16}$/.test(taskId)){ 
+        res.status(400).json({ error: 'ID有誤' });
+        return;
+    }
     const resultPath = path.join(RESULTS_DIR, `${req.params.taskId}.json`);
     if (fs.existsSync(resultPath)) {
         res.sendFile(resultPath);
@@ -66,18 +76,22 @@ app.post('/predict', upload.single('fastaFile'), (req, res) => {
 
     const taskId = crypto.randomBytes(8).toString('hex');
     const filePath = path.resolve(req.file.path);
-    const organism = req.body.organism || 'fungi';
+    const organism = ['fungi', 'metazoa', 'plant'].includes(req.body.organism) ? req.body.organism : 'fungi'; // 預防code injection
 
     const command = `export PERL5LIB=$PERL5LIB:${MITOFATES_ROOT}/bin/modules && export PATH=$PATH:/usr/bin && perl ${MITOFATES_SCRIPT} ${filePath} ${organism}`;
 
     console.log(`[${taskId}] 開始分析...`);
 
-    exec(command, { cwd: MITOFATES_ROOT, maxBuffer: 1024 * 5000 }, (error, stdout, stderr) => {
+    exec(command, { cwd: MITOFATES_ROOT, maxBuffer: 1024 * 5000, timeout: 30000}, (error, stdout, stderr) => {
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
         if (error) {
             console.error(`執行錯誤: ${error}`);
-            return res.status(500).json({ error: '引擎執行失敗', details: stderr });
+            if (error.killed) {
+                return res.status(500).json({ error: '執行超時', details: stderr });
+            } else {
+                return res.status(500).json({ error: '引擎執行失敗', details: stderr });
+            }
         }
 
         try {
@@ -100,6 +114,7 @@ app.post('/predict', upload.single('fastaFile'), (req, res) => {
             };
 
             fs.writeFileSync(path.join(RESULTS_DIR, `${taskId}.json`), JSON.stringify(taskData, null, 2));
+            console.log(taskData);
             res.json({ taskId });
 
         } catch (e) {
@@ -108,10 +123,9 @@ app.post('/predict', upload.single('fastaFile'), (req, res) => {
     });
 });
 
-const PORT = 3000;
 app.listen(PORT, () => {
     console.log('===========================================');
-    console.log(`🚀 服務運行中: http://localhost:${PORT}`);
+    console.log(`🚀 服務運行中: ${HOST}:${PORT}`);
     console.log('===========================================');
 }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
