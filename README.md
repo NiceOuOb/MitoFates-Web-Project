@@ -1,6 +1,6 @@
 # MitoFates Web Service 
 
-這是一個將 **MitoFates** 現代化的 Web 專案。透過 Node.js 重新封裝 Perl 核心腳本，並提供直觀的任務管理與數據視覺化介面。
+這是一個將粒線體預測生物資訊工具 **MitoFates** 現代化的 Web 專案。本專案透過 **Node.js** 重新封裝 Perl 核心計算引擎，並提供直觀的任務管理與數據視覺化介面。
 
 ---
 
@@ -8,96 +8,93 @@
 
 本專案運行於 Linux 環境（建議使用 Ubuntu 20.04/22.04+），啟動前請執行以下指令安裝各項核心組件：
 
-### 1. Node.js 執行環境
-本專案後端使用 Node.js 開發，請確保已安裝 v14.x 以上版本：
+## 🛠️ 環境需求 (Prerequisites)
+專案運行於 Linux 環境（建議使用 Ubuntu 20.04/22.04+），本機僅需預先安裝：
+1. **Node.js**: v14.x 或更高版本（含 `npm`）。
+2. **Perl**: 系統內建 Perl 5 即可。
+
 ```bash
 # 安裝 Node.js 與 npm (以 Ubuntu 為例)
 sudo apt update
 sudo apt install -y nodejs npm
 ```
 
-### 2. Perl 核心環境
-MitoFates 的預測引擎基於 Perl 撰寫，需安裝系統環境與相關處理套件：
 ```bash
 # 安裝 Perl 及其必要處理工具
 sudo apt install -y perl gawk build-essential
 ```
 
-### 3. 生物資訊與 SVM 工具
-這是運行預測模型最關鍵的步驟，包含 SVM 分類器與必要的數學函式庫：
-```bash
-# 更新套件清單並安裝 SVM 工具與數學套件
-sudo apt update
-sudo apt install -y libsvm-tools libmath-cephes-perl libperl6-slurp-perl libinline-perl
-```
+## 🚀 快速啟動與安裝步驟
 
-## 🚀 安裝與啟動步驟
+請複製專案後，直接進入 `mitofates-web` 目錄執行自動化指令：
 
-### 1. 取得專案與進入目錄
-首先複製專案並進入網頁服務資料夾：
 ```bash
-git clone [這個專案]
+# 1. 取得專案並進入網頁服務目錄
+git clone [本專案連結]
 cd MitoFates-Web-Project/mitofates-web
 ```
 
-### 2. 安裝 Node.js 套件
-執行 npm 指令安裝 `server.js` 所需的依賴項目（如 Express, Multer 等）：
+### ⚙️ NPM 自動化部署流程（依序執行）
+
 ```bash
-npm install
+# 2. 系統初始化：安裝 Linux 工具、Perl 核心數學/C 橋接套件，並自動修復 svm-predict 軟連結
+npm run init
+
+# 3. 核心下載：自動將官方 MitoFates 演算法引擎與模型 Git Clone 至指定的外層相對路徑
+npm run install
+
+# 4. 生產環境配置：讀取 lock 檔精準安裝 Node.js 套件，並自動忽略開發期專用套件
+npm run setup
+
+# 5. 啟動 Web 服務伺服器
+npm start
 ```
 
-### 3. 配置系統指令連結 (Symlink)
-由於原始 Perl 腳本預期呼叫 `svm_predict` (底線)，而 Ubuntu 套件安裝後的指令名稱為 `svm-predict` (橫線)，請執行以下指令建立連結：
-```bash
-sudo ln -sf /usr/bin/svm-predict /usr/bin/svm_predict
-sudo ln -sf /usr/bin/svm-scale /usr/bin/svm_scale
-```
-
-### 4. 啟動服務
-使用 Node.js 啟動後端伺服器：
-```bash
-node server.js
-```
-
-### 5. 瀏覽器訪問
-服務啟動後，請於瀏覽器輸入網址即可開始使用：
+服務啟動後，本機請於瀏覽器輸入網址開始使用：
 👉 [http://localhost:3000](http://localhost:3000)
+> 💡若需要進行前端 UI 或後端程式碼即時修改，可執行 `npm run dev-start`。系統將啟用 `nodemon` 監聽機制，在您儲存檔案時自動重啟伺服器。
 
-## 📖 使用指南
+
+## 📖 使用指南 (User Guide)
 
 ### 1. 提交預測任務
-- **貼上序列 (FASTA)**：在首頁文字方塊中輸入標準蛋白質 FASTA 序列。
-- **範例測試**：若無現成數據，可點擊 **「填入範例序列 (Example)」** 按鈕，系統會自動載入測試序列。
-- **選擇生物模型**：根據您的蛋白來源選擇對應的模式：
-    - `Fungi`：真菌類蛋白
-    - `Metazoa`：動物/後生動物蛋白
-    - `Plant`：植物類蛋白
-- **執行**：點擊「提交並執行分析」，系統將顯示任務建立狀態。
+- **貼上或上傳序列 (FASTA)**：手動在文字方塊輸入標準蛋白質 FASTA 序列。
+- **範例與清除**：點擊 **「填入範例序列 (Example)」** 可載入測試資料；點擊 **「清除內容」** 可一鍵重設表單。
+- **模型選擇**：根據蛋白來源選擇 `Fungi` (真菌)、`Metazoa` (動物) 或 `Plant` (植物)。
+- **快速導覽**：點擊右上角的 **「分析紀錄」** 按鈕可隨時切換至歷史紀錄頁面。
 
-### 2. 解析分析結果
-- **自動跳轉**：分析完成後，系統會自動引導至專屬結果頁面。
-- **視覺化指標**：
-    - **Probability (機率)**：以動態進度條呈現，綠色代表高機率（>0.385），灰色代表低機率。
-    - **Cleavage Site (切割位點)**：自動標註預測的線粒體標靶序列切割位置。
-- **任務分享與保存**：
-    - 每個任務都有唯一 URL（格式：`/result/[Task_ID]`）。
-    - 您可以記錄此網址，結果將在伺服器保留 14 天供隨時回顧。
+### 2. 解析與操作分析結果
+- **自動跳轉與時間補完**：任務建立成功後，網頁自動跳轉至 `/result/[Task_ID]`。
+- **數據視覺化指標**：
+  - `Probability` (機率) 欄位成彩色**進度條**，綠色代表高機率（>0.385），灰色代表一般機率。
+  - `Cleavage Site` (切割位點) 與其餘生資指標將自動表格化呈現。
+- **分享結果**：點擊 **「分享結果」** 按鈕，系統會將當前網址複製到剪貼簿。
+- **下載結果**：點擊 **「下載結果(json)」** 按鈕，系統原始 JSON 轉化為 Data URL，下載名為 `result-[Task_ID].json` 的檔案。
+
+### 3. 個人歷史紀錄管理
+- **歷史看板**：呈現使用者 14 天內所有的預測紀錄，包含任務 ID、分析時間、生物類別。點擊卡片上的 **「查看結果」** 可直通該報告。
+- **無痕管理**：
+  - **單一刪除**：點擊 **「刪除記錄」**，系統會跳出提示，確認後移除該紀錄。
+  - **一鍵清空**：點擊下方的 **「刪除歷史記錄」**，可完全清空本地緩衝。
 
 ---
 
 ## 📂 專案架構與檔案說明
+
 ```text
 .
-├── MitoFates/           # 核心預測引擎 (由 Perl 撰寫)
-│   ├── script/          # MitoFates.pl 主程式與相關 Modules
-│   └── models/          # 預先訓練好的 SVM 模型資料
-└── mitofates-web/       # Node.js 網頁服務架構
-    ├── server.js        # 後端核心：處理 API 請求、執行背景清理、任務調度
-    ├── public/          # 靜態資源 (HTML 介面與前端 JavaScript)
+├── MitoFates/           # 核心預測引擎 (由 npm run install 自動下載至外層相對目錄)
+│   ├── script/          # MitoFates.pl 主程式與相關 Modules 檔案
+│   └── models/          # 預先訓練好的各式生物（Fungi/Metazoa/Plant）SVM 模型資料
+└── mitofates-web/       # Node.js 網頁服務架構主體
+    ├── server.js        # 後端核心：處理 API 路由、背景 14 天過期任務自動清理與調度
+    ├── package.json     # 腳本化定義檔案
+    ├── package-lock.json# 確切套件版本鎖定快照檔
+    ├── public/          # 前端網頁靜態資源目錄
     │   ├── index.html   # 分析提交首頁
-    │   └── result.html  # 獨立結果展示頁面
-    ├── results/         # 儲存分析結果 JSON
-    ├── uploads/         # 上傳序列暫存目錄 (分析完畢後自動刪除)
-    └── package.json     # 專案依賴與腳本定義
+    │   ├── result.html  # 獨立結果展示頁面
+    │   └── history.html # 14天內個人歷史紀錄看板
+    ├── results/         # 儲存背景生成的分析結果 JSON 目錄
+    └── uploads/         # 上傳序列暫存目錄
 ```
 
