@@ -2,6 +2,8 @@
 
 這是一個將粒線體預測生物資訊工具 **MitoFates** 現代化的 Web 專案。本專案透過 **Node.js** 重新封裝 Perl 核心計算引擎，並提供直觀的任務管理與數據視覺化介面。
 
+專案連結： https://mitofates-web.xyz
+
 ---
 
 ## 🛠️ 環境需求 (Prerequisites)
